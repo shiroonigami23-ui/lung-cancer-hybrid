@@ -80,6 +80,7 @@ def main() -> None:
     args = parse_args()
     set_seed(args.seed)
     Path(args.outdir).mkdir(parents=True, exist_ok=True)
+    Path(args.data_root).mkdir(parents=True, exist_ok=True)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"device={device}")
@@ -151,4 +152,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
