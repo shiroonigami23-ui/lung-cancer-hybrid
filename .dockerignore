@@ -1,0 +1,15 @@
+.git
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+checkpoints
+outputs
+runs
+wandb
+mlruns
+data_raw
+data_processed
+models/best.pt
+*.pt
+*.pth

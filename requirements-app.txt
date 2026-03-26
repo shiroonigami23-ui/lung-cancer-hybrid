@@ -1,0 +1,5 @@
+torch>=2.3.0
+torchvision>=0.18.0
+gradio>=5.24.0
+huggingface_hub>=0.30.0
+numpy>=1.26.0

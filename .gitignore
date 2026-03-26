@@ -23,3 +23,14 @@ mlruns/
 data_raw/
 data_processed/
 
+# Local debug / bridge tooling
+cloudflared.exe
+__*.py
+__*.sh
+hf_publish_tmp/
+hf_space_tmp/
+
+# Local model checkpoints
+models/best.pt
+*.pt
+*.pth

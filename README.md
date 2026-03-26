@@ -1,75 +1,68 @@
-# Lung Cancer Hybrid Model (Sybil + ResNet3D)
+# Lung Cancer Hybrid Model
 
-Starter implementation of the Sybil-ResNet late-fusion blueprint from `Sybil_ResNet_Hybrid_Blueprint.pdf`.
+Hybrid 3D lung nodule classification pipeline with a fusion architecture and deployment-ready inference app.
 
-## Current Status
+## Live Links
 
-- Project scaffold created from the blueprint module layout.
-- Baseline hybrid model implemented:
-  - global branch: `SybilFeatureExtractor` (real Sybil if installed, fallback 3D CNN)
-  - local branch: `ResNet3DNodule` (3D encoder + 256-d embedding)
-  - fusion head: malignancy logits + 6-year risk scores
-- Minimal training/evaluation/inference pipeline included.
+- Hugging Face Model: https://huggingface.co/ShiroOnigami23/lung-cancer-hybrid-model
+- Hugging Face Space (Web App): https://huggingface.co/spaces/ShiroOnigami23/lung-cancer-hybrid-app
+
+## Latest Results
+
+- Test Accuracy: **84.19%**
+- Test AUC: **0.9202**
+- Test F1: **0.6918**
+- Dataset used for benchmark run: **MedMNIST NoduleMNIST3D** (derived from LIDC-IDRI)
 
 ## Project Structure
 
 ```text
+app.py
+Dockerfile
+requirements.txt
+requirements-app.txt
 data/
 models/
 training/
 evaluation/
 inference/
-notebooks/
-train.py
-requirements.txt
+scripts/
 ```
 
-## Quick Start (Local or Colab)
+## Recommended Framework
+
+For fastest iteration + shareable demo, use:
+
+- **Gradio + Hugging Face Spaces** (already set up)
+
+Reason: easiest deployment flow, direct model hosting, and instant public/private demos with zero custom backend maintenance.
+
+## Run App Locally
 
 ```bash
-pip install -r requirements.txt
+pip install -r requirements-app.txt
+python app.py
+```
+
+Then open `http://localhost:7860`.
+
+## Run With Docker
+
+```bash
+docker build -t lung-cancer-hybrid .
+docker run -p 7860:7860 lung-cancer-hybrid
+```
+
+## Train
+
+```bash
 python train.py --epochs 2 --batch-size 2 --num-workers 0 --mock-data
 ```
 
-## Colab Notes
+For real-dataset training in Colab, use scripts under `scripts/`.
 
-- Your notebook link is reachable.
-- Use secrets already configured in Colab (`HF_TOKEN`, `WANDB_API_KEY`, etc.).
-- Clone this repo in Colab and run training there for GPU acceleration.
+## Notes
 
-## End-to-End Colab (Real Dataset + Pretrained + HF + App)
+- The app expects a `.npy` 3D nodule patch input.
+- `app.py` loads weights directly from the Hugging Face model repo.
 
-Run these cells in order:
-
-```python
-!git -C /content/lung-cancer-hybrid pull
-%cd /content/lung-cancer-hybrid
-!pip install -r requirements.txt
-```
-
-```python
-from google.colab import userdata
-import os
-os.environ["HF_TOKEN"] = userdata.get("HF_TOKEN")
-os.environ["HF_REPO_ID"] = "shiroonigami23-ui/lung-cancer-hybrid-nodulemnist3d"
-```
-
-```python
-!python scripts/train_nodulemnist3d.py --epochs 8 --batch-size 32 --num-workers 2
-!python scripts/push_to_hf.py --repo-id $HF_REPO_ID
-```
-
-```python
-!python app/gradio_app.py --repo-id $HF_REPO_ID --share
-```
-
-Notes:
-- Dataset: `NoduleMNIST3D` (MedMNIST, derived from LIDC-IDRI).
-- Backbone: pretrained `r3d_18`, then fine-tuned.
-- App input: upload a `.npy` 3D nodule patch.
-
-## Next Build Steps
-
-1. Plug real LIDC-IDRI parsing in `data/lidc_parser.py`.
-2. Integrate official Sybil weights/token handling in `models/sybil_extractor.py`.
-3. Add real validation on LIDC/NLST with calibration and reporting.
