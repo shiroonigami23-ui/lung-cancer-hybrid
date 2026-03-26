@@ -41,6 +41,24 @@ def _upsample_3d_to_64(x: torch.Tensor) -> torch.Tensor:
     return torch.nn.functional.interpolate(x, size=(64, 64, 64), mode="trilinear", align_corners=False)
 
 
+def _prepare_batch_x(x: torch.Tensor, device: torch.device) -> torch.Tensor:
+    x = x.float()
+    # Handle possible shapes from MedMNIST:
+    # (B, D, H, W) or (B, 1, D, H, W) or (B, D, H, W, 1)
+    if x.ndim == 4:
+        x = x.unsqueeze(1)
+    elif x.ndim == 5 and x.shape[-1] == 1:
+        x = x.permute(0, 4, 1, 2, 3).contiguous()
+    elif x.ndim == 5 and x.shape[1] == 1:
+        pass
+    else:
+        raise ValueError(f"Unexpected input shape: {tuple(x.shape)}")
+
+    x = x.to(device)
+    x = x / 255.0 if x.max() > 1.0 else x
+    return _upsample_3d_to_64(x)
+
+
 def build_model(num_classes: int = 2) -> nn.Module:
     model = r3d_18(weights=R3D_18_Weights.DEFAULT)
     model.stem[0] = nn.Conv3d(
@@ -60,8 +78,7 @@ def evaluate(model: nn.Module, loader: DataLoader, device: torch.device) -> Tupl
     probs_all, labels_all = [], []
     with torch.no_grad():
         for x, y in loader:
-            x = x.float().unsqueeze(1).to(device) / 255.0
-            x = _upsample_3d_to_64(x)
+            x = _prepare_batch_x(x, device)
             y = y.squeeze(1).long().to(device)
             logits = model(x)
             probs = torch.softmax(logits, dim=1)[:, 1]
@@ -111,8 +128,7 @@ def main() -> None:
         epoch_losses = []
         loop = tqdm(train_loader, desc=f"epoch {epoch}/{args.epochs}", leave=False)
         for x, y in loop:
-            x = x.float().unsqueeze(1).to(device) / 255.0
-            x = _upsample_3d_to_64(x)
+            x = _prepare_batch_x(x, device)
             y = y.squeeze(1).long().to(device)
 
             optimizer.zero_grad(set_to_none=True)
