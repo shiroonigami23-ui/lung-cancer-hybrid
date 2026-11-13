@@ -2,8 +2,6 @@
 
 <img src="assets/medmnist-overview.jpg" alt="Lung Cancer Hybrid Model" width="90%">
 
-<sub>MedMNIST v2 overview — this project trains on <b>NoduleMNIST3D</b> (bottom row, 2nd). Image: <a href='https://github.com/MedMNIST/MedMNIST'>MedMNIST</a> (Apache-2.0)</sub>
-
 # 🫁 Lung Cancer Hybrid Model
 
 ### Hybrid 3D CT nodule classifier — Sybil-style features fused with a 3D ResNet, served on Gradio
